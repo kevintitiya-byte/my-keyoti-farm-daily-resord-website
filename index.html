@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keyoti Daily Farm Log</title>
+<style>
+:root{--bg:#fff;--card:#fff7f0;--ink:#1a1a1a;--mute:#6b625a;--line:#eadfd5;--accent:#e8590c;--red:#c92a2a;--good:#2b8a3e;--inp:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171412;--card:#211c18;--ink:#f3ede7;--mute:#a59a90;--line:#3a312a;--accent:#ff8a3d;--red:#ff8787;--good:#69db7c;--inp:#2a231e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#171412;--card:#211c18;--ink:#f3ede7;--mute:#a59a90;--line:#3a312a;--accent:#ff8a3d;--red:#ff8787;--good:#69db7c;--inp:#2a231e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:0 0 2px;border-left:6px solid var(--accent);padding-left:10px}
+h2{font-size:1.05rem;margin:0 0 10px}
+.mute{color:var(--mute);font-size:.88rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:3px}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--inp);border:1px solid var(--line);border-radius:10px;padding:10px}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.stat b{display:block;font-size:1.15rem}
+.calc{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.calc div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px}
+.calc b{display:block;font-size:1.2rem;color:var(--accent)}
+.calc small{color:var(--mute);font-size:.75rem}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:12px 14px;cursor:pointer;background:var(--accent);color:#fff;width:100%}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.del{background:transparent;color:var(--red);border:1px solid var(--line)}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.row .btn{flex:1 1 140px}
+.alert{border-left:6px solid var(--red);background:var(--card);border-radius:10px;padding:10px 12px;margin:14px 0}
+.msg{min-height:1.3em;margin-top:8px;font-size:.9rem}
+.msg.err{color:var(--red)}
+.chk{display:flex;gap:8px;align-items:center;margin-top:12px}
+.chk input{width:auto}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tbody tr{cursor:pointer}
+svg{width:100%;max-width:520px;height:auto;display:block}
+@media (max-width:480px){.stats,.calc{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>Keyoti Poultry Farm</h1>
+<div class="mute">Daily farm log · <span id="store">Loading…</span></div>
+
+<section class="card" aria-label="Summary">
+  <h2>Where the flock stands</h2>
+  <div class="stats" id="stats"></div>
+</section>
+<div id="alert"></div>
+
+<section class="card" aria-label="Daily entry">
+  <h2>Daily entry</h2>
+  <div class="grid">
+    <div class="full"><label for="date">Date</label><input type="date" id="date"></div>
+    <div class="full mute" id="hint"></div>
+    <div><label for="open">Opening birds</label><input id="open" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div><label for="add">Birds added</label><input id="add" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div><label for="dead">Deaths</label><input id="dead" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div><label for="sold">Sold / culled</label><input id="sold" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div><label for="eggs">Total eggs collected</label><input id="eggs" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div><label for="brk">Broken / damaged eggs</label><input id="brk" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div><label for="feed">Feed consumed (kg)</label><input id="feed" type="number" inputmode="decimal" min="0" step="any"></div>
+    <div><label for="water">Water consumed (litres)</label><input id="water" type="number" inputmode="decimal" min="0" step="any"></div>
+    <div><label for="traysSold">Trays sold today</label><input id="traysSold" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div><label for="vacc">Vaccination / treatment</label><input id="vacc" type="text" maxlength="200"></div>
+    <div class="full"><label for="notes">Observations</label><textarea id="notes" rows="3" maxlength="1000" placeholder="Feed changes, unusual behaviour, sick birds, egg quality, water interruptions…"></textarea></div>
+  </div>
+  <div class="calc" aria-live="polite">
+    <div><b id="oClose">0</b><small>Closing birds</small></div>
+    <div><b id="oSale">0</b><small>Saleable eggs</small></div>
+    <div><b id="oTrays">0</b><small id="oLoose">trays of 30</small></div>
+    <div><b id="oHd">0.0%</b><small>Hen-day rate</small></div>
+  </div>
+  <div class="mute" style="margin-top:8px">Feed per bird: <b id="oFpb">0</b> g/day · Closing = opening + added − deaths − sold/culled · Hen-day = eggs collected ÷ closing birds × 100</div>
+  <label class="chk"><input type="checkbox" id="chk"> I have checked these figures against the actual farm records.</label>
+  <div class="row">
+    <button class="btn" id="save">Save this day</button>
+    <button class="btn alt" id="copy">Copy daily report</button>
+    <button class="btn del" id="del" hidden>Delete this day</button>
+  </div>
+  <div class="msg" id="msg" role="status"></div>
+  <textarea id="report" rows="9" readonly hidden aria-label="Daily report text"></textarea>
+</section>
+
+<section class="card" aria-label="Trends">
+  <h2>Trends (last 30 saved days)</h2>
+  <div id="charts"></div>
+</section>
+
+<section class="card" aria-label="Recent entries">
+  <h2>Recent entries <span class="mute">(tap a row to edit)</span></h2>
+  <div class="scroll"><table><thead><tr><th>Date</th><th>Birds</th><th>Eggs</th><th>Hen-day</th><th>Trays</th><th>Deaths</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="mute" id="empty">No saved days yet.</div>
+</section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseFloat(v); return isFinite(n) && n >= 0 ? n : 0; };
+const r1 = v => Math.round(v * 10) / 10;
+const NUM = ['open','add','dead','sold','eggs','brk','feed','water','traysSold'];
+const KEY = 'keyoti-farm-log-v1';
+let entries = {}, db = null, first = true, delArm = false;
+
+function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function fmt(d) { const p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+function msg(t, err) { const m = $('msg'); m.textContent = t; m.className = 'msg' + (err ? ' err' : ''); }
+function sorted() { return Object.keys(entries).sort().map(k => entries[k]); }
+function prevEntry(d) { let b = null; for (const k in entries) if (k < d && (!b || k > b)) b = k; return b ? entries[b] : null; }
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch (e) {} }
+
+function calc() {
+  const open = num($('open').value), add = num($('add').value), dead = num($('dead').value), sold = num($('sold').value);
+  const close = Math.max(0, open + add - dead - sold);
+  const eggs = num($('eggs').value), brk = Math.min(num($('brk').value), eggs);
+  const sale = eggs - brk, trays = Math.floor(sale / 30), loose = sale % 30;
+  const hd = close > 0 ? eggs / close * 100 : 0;
+  const fpb = close > 0 ? num($('feed').value) * 1000 / close : 0;
+  return { close, eggs, brk, sale, trays, loose, hd, fpb };
+}
+function showCalc() {
+  const c = calc();
+  $('oClose').textContent = c.close; $('oSale').textContent = c.sale; $('oTrays').textContent = c.trays;
+  $('oLoose').textContent = 'trays of 30 (+' + c.loose + ' loose eggs)';
+  $('oHd').textContent = r1(c.hd).toFixed(1) + '%'; $('oFpb').textContent = Math.round(c.fpb);
+}
+function collect() {
+  const c = calc();
+  return { date: $('date').value, open: num($('open').value), add: num($('add').value), dead: num($('dead').value), sold: num($('sold').value),
+    close: c.close, eggs: c.eggs, brk: c.brk, sale: c.sale, trays: c.trays, hd: r1(c.hd), feed: num($('feed').value), water: num($('water').value),
+    fpb: r1(c.fpb), traysSold: num($('traysSold').value), vacc: $('vacc').value.trim(), notes: $('notes').value.trim(), savedAt: new Date().toISOString() };
+}
+
+function load(d) {
+  const e = entries[d];
+  NUM.forEach(f => { $(f).value = e && e[f] !== undefined ? e[f] : ''; });
+  $('vacc').value = e ? (e.vacc || '') : ''; $('notes').value = e ? (e.notes || '') : '';
+  let h;
+  if (e) h = 'Saved entry for this day. Edit it and save to update.';
+  else {
+    const p = prevEntry(d);
+    if (p) { $('open').value = p.close; h = 'Opening birds carried over from ' + fmt(p.date) + '. Change it only if the count was wrong.'; }
+    else h = 'First entry: type the number of birds currently in the house.';
+  }
+  $('hint').textContent = h; $('chk').checked = false; $('report').hidden = true;
+  $('del').hidden = !e; delArm = false; $('del').textContent = 'Delete this day'; showCalc();
+}
+
+function chart(list, key, label, unit) {
+  const pts = list.filter(e => typeof e[key] === 'number');
+  if (pts.length < 2) return '<p class="mute">' + label + ': save at least 2 days to see a trend.</p>';
+  const W = 360, H = 150, p = 30, vals = pts.map(e => e[key]);
+  let lo = Math.min(...vals), hi = Math.max(...vals); if (hi === lo) hi = lo + 1;
+  const pad = (hi - lo) * 0.15; lo = Math.max(0, lo - pad); hi += pad;
+  const x = i => p + i * (W - 2 * p) / (pts.length - 1), y = v => H - p - (v - lo) / (hi - lo) * (H - 2 * p);
+  const line = pts.map((e, i) => x(i).toFixed(1) + ',' + y(e[key]).toFixed(1)).join(' ');
+  const dots = pts.map((e, i) => '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(e[key]).toFixed(1) + '" r="2.5" style="fill:var(--accent)"/>').join('');
+  const last = pts[pts.length - 1], t = 'style="fill:var(--mute);font-size:10px"';
+  return '<div style="margin-bottom:10px"><b style="font-size:.9rem">' + label + '</b> <span class="mute">latest ' + last[key] + unit + '</span>' +
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + label + ' over time"><line x1="' + p + '" y1="' + (H - p) + '" x2="' + (W - p) + '" y2="' + (H - p) + '" style="stroke:var(--line)"/>' +
+    '<polyline points="' + line + '" fill="none" style="stroke:var(--accent)" stroke-width="2"/>' + dots +
+    '<text x="' + p + '" y="' + (H - 10) + '" ' + t + '>' + fmt(pts[0].date).slice(0, 5) + '</text>' +
+    '<text x="' + (W - p) + '" y="' + (H - 10) + '" text-anchor="end" ' + t + '>' + fmt(last.date).slice(0, 5) + '</text>' +
+    '<text x="4" y="' + (p - 6) + '" ' + t + '>' + r1(hi) + '</text><text x="4" y="' + (H - p) + '" ' + t + '>' + r1(lo) + '</text></svg></div>';
+}
+
+function render() {
+  const all = sorted(), recent = all.slice(-30), last = all[all.length - 1];
+  const w7 = all.slice(-7);
+  const avg = w7.length ? r1(w7.reduce((a, e) => a + e.hd, 0) / w7.length) : null;
+  const dead7 = w7.reduce((a, e) => a + (e.dead || 0), 0);
+  const st = [[last ? last.close : '–', 'Birds now'], [last ? last.hd + '%' : '–', 'Hen-day (latest)'], [avg !== null ? avg + '%' : '–', 'Hen-day (7 days)'], [last ? last.trays : '–', 'Trays on latest day']];
+  $('stats').innerHTML = st.map(s => '<div class="stat"><b>' + s[0] + '</b><span class="mute">' + s[1] + '</span></div>').join('');
+  $('stats').insertAdjacentHTML('afterend', '');
+  let al = '';
+  if (all.length >= 4) {
+    const prior = all.slice(-8, -1), pa = prior.reduce((a, e) => a + e.hd, 0) / prior.length, drop = pa - last.hd;
+    if (drop >= 10) al = '<div class="alert"><b>Hen-day rate fell ' + r1(drop) + ' points</b> below the previous average (' + fmt(last.date) + '). Check feed, water, heat, lighting and bird health. If birds look sick, call a vet.</div>';
+  }
+  if (dead7 > 0 && last) al += '<div class="alert"><b>' + dead7 + ' death' + (dead7 === 1 ? '' : 's') + '</b> recorded in the last ' + w7.length + ' saved days.</div>';
+  $('alert').innerHTML = al;
+  $('charts').innerHTML = chart(recent, 'hd', 'Hen-day rate', '%') + chart(recent, 'fpb', 'Feed per bird', ' g/day');
+  const rows = all.slice(-14).reverse();
+  $('rows').innerHTML = rows.map(e => '<tr data-d="' + e.date + '"><td>' + fmt(e.date) + '</td><td>' + e.close + '</td><td>' + e.eggs + '</td><td>' + e.hd + '%</td><td>' + e.trays + '</td><td>' + e.dead + '</td></tr>').join('');
+  $('empty').hidden = rows.length > 0;
+}
+
+async function save() {
+  const d = $('date').value;
+  if (!d) return msg('Pick a date first.', 1);
+  if (!$('chk').checked) return msg('Tick the box to confirm you checked the figures.', 1);
+  const e = collect();
+  try {
+    if (db) await db.collection('entries').doc(d).set(e); else { entries[d] = e; persist(); }
+    entries[d] = e; render(); $('chk').checked = false; $('del').hidden = false; msg('Saved ' + fmt(d) + '.');
+  } catch (err) { msg('Could not save. Check your connection and try again.', 1); }
+}
+async function remove() {
+  const d = $('date').value; if (!entries[d]) return;
+  if (!delArm) { delArm = true; $('del').textContent = 'Tap again to confirm delete'; setTimeout(() => { delArm = false; $('del').textContent = 'Delete this day'; }, 4000); return; }
+  try {
+    if (db) await db.collection('entries').doc(d).delete(); else persist();
+    delete entries[d]; if (!db) persist(); load(d); render(); msg('Deleted ' + fmt(d) + '.');
+  } catch (err) { msg('Could not delete. Try again.', 1); }
+}
+async function copyReport() {
+  const e = collect(), c = calc();
+  const t = ['KEYOTI POULTRY FARM – DAILY REPORT', 'Date: ' + (e.date ? fmt(e.date) : '-'),
+    'Birds: opening ' + e.open + ', added ' + e.add + ', deaths ' + e.dead + ', sold/culled ' + e.sold + ', closing ' + e.close,
+    'Eggs: collected ' + e.eggs + ', broken ' + e.brk + ', saleable ' + e.sale + ' (' + c.trays + ' trays + ' + c.loose + ' loose)',
+    'Hen-day rate: ' + e.hd + '%', 'Feed: ' + e.feed + ' kg (' + e.fpb + ' g/bird) | Water: ' + e.water + ' L',
+    'Trays sold: ' + e.traysSold, 'Vaccination/treatment: ' + (e.vacc || 'none'), 'Observations: ' + (e.notes || 'none')].join('\n');
+  const box = $('report'); box.value = t; box.hidden = false;
+  try { await navigator.clipboard.writeText(t); msg('Report copied.'); } catch (err) { box.select(); msg('Select the text below and copy it.'); }
+}
+
+NUM.concat(['date']).forEach(f => $(f).addEventListener('input', () => { if (f === 'date') load($('date').value); else showCalc(); }));
+$('save').onclick = save; $('del').onclick = remove; $('copy').onclick = copyReport;
+$('rows').addEventListener('click', ev => { const tr = ev.target.closest('tr'); if (tr) { $('date').value = tr.dataset.d; load(tr.dataset.d); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+
+(async () => {
+  $('date').value = today();
+  try { db = window.claude && claude.use ? await claude.use('db') : null; } catch (e) { db = null; }
+  if (!db) {
+    try { entries = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { entries = {}; }
+    $('store').textContent = 'saving on this device only';
+    load($('date').value); render(); return;
+  }
+  $('store').textContent = 'saved to your farm records';
+  const timer = setTimeout(() => { $('store').textContent = 'cannot reach saved records yet, figures may be out of date'; }, 10000);
+  db.collection('entries').onSnapshot(snap => {
+    const m = {}; snap.docs.forEach(x => { const v = x.data(); if (v && v.date) m[v.date] = v; });
+    entries = m; render();
+    if (first) { first = false; load($('date').value); }
+    if (!snap.fromCache) { clearTimeout(timer); $('store').textContent = 'saved to your farm records'; }
+  }, err => { clearTimeout(timer); $('store').textContent = 'cannot load saved records'; load($('date').value); render(); });
+})();
+</script>
+</body>
+</html>
